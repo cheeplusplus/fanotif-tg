@@ -57,11 +57,11 @@ async function processUserUpdate(user) {
 
     await processUpdateAuto(user, "last_update_sub", "submissions", () => fa.getSubmissions(), async (item) => {
         const submission = await fa.getSubmission(item.id);
-        await bot.sendMessage(user, `Submission: <b>${submission.title}</b> by ${submission.artist}\n\n[ <a href="${submission.url}">Direct</a> | <a href="${item.url}">Link</a> ]\n\n${bodyText(submission.body_text, 200)}`);
+        await bot.sendMessage(user, `Submission: <b>${escape(submission.title)}</b> by ${submission.artist}\n\n[ <a href="${submission.url}">Direct</a> | <a href="${item.url}">Link</a> ]\n\n${bodyText(submission.body_text, 200)}`);
     });
 
     await processUpdateAuto(user, "last_update_jou", "journals", () => fa.getMessages(), (item) => {
-        return bot.sendMessage(user, `Journal: <b>${item.title}</b> by ${item.user_name}\n\n[ <a href="${item.url}">Link</a> ]`);
+        return bot.sendMessage(user, `Journal: <b>${escape(item.title)}</b> by ${item.user_name}\n\n[ <a href="${item.url}">Link</a> ]`);
     });
 
     db.updateUser(user);
