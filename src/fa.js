@@ -159,6 +159,29 @@ class FurAffinityClient {
                     "when": "div > small > span"
                 }
             },
+            "comments": {
+                "listItem": "ul#comments > li:not(.section-controls)",
+                "data": {
+                    "id": {
+                        "selector": "input[type='checkbox']",
+                        "attr": "value",
+                        "convert": parseInt
+                    },
+                    "title": "a:nth-child(4)",
+                    "url": {
+                        "selector": "a:nth-child(4)",
+                        "attr": "href",
+                        "convert": fixDomainless
+                    },
+                    "user_name": "a:nth-child(2)",
+                    "user_url": {
+                        "selector": "a:nth-child(2)",
+                        "attr": "href",
+                        "convert": fixDomainless
+                    },
+                    "when": "span"
+                }
+            },
             "favorites": {
                 "listItem": "ul#favorites > li:not(.section-controls)",
                 "data": {
