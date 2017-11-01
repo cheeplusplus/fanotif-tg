@@ -1,6 +1,7 @@
 const Promise = require("bluebird");
 const _ = require("lodash");
-const NotifBot = require("./bot");
+const MainBot = require("./main_bot");
+const FilterBot = require("./filter_bot");
 const FurAffinityClient = require("./fa");
 const db = require("./db");
 const escape = require("escape-html");
@@ -28,7 +29,8 @@ const config = require("../config.json");
 
 
 // Init bot
-const bot = new NotifBot(config.telegram.token);
+const mainBot = new MainBot(config.telegram.main_token);
+const filterBot = new FilterBot(config.telegram.filter_token);
 
 
 // FA check stuff
@@ -58,17 +60,26 @@ async function processUserUpdate(user) {
 
     await processUpdateAuto(user, "last_update_sub", "submissions", submissions, async (item) => {
         const submission = await fa.getSubmission(item.id);
-        await bot.sendMessage(user, `Submission: <b>${escape(submission.title)}</b> by ${submission.artist}\n\n[ <a href="${submission.url}">Direct</a> | <a href="${item.url}">Link</a> ]\n\n${bodyText(submission.body_text, 200)}`);
+        const msgText = `Submission: <b>${escape(submission.title)}</b> by ${submission.artist}\n\n[ <a href="${submission.url}">Direct</a> | <a href="${item.url}">Link</a> ]\n\n${bodyText(submission.body_text, 200)}`;
+
+        await mainBot.sendMessage(user, msgText);
+        await filterBot.sendFilteredMessage(user, "submission", submission.title, msgText);
     });
 
     const messages = await fa.getMessages();
 
-    await processUpdateAuto(user, "last_update_jou", "journals", messages, (item) => {
-        return bot.sendMessage(user, `Journal: <b>${escape(item.title)}</b> by ${item.user_name}\n\n[ <a href="${item.url}">Link</a> ]`);
+    await processUpdateAuto(user, "last_update_jou", "journals", messages, async (item) => {
+        const msgText = `Journal: <b>${escape(item.title)}</b> by ${item.user_name}\n\n[ <a href="${item.url}">Link</a> ]`;
+
+        await mainBot.sendMessage(user, msgText);
+        await filterBot.sendFilteredMessage(user, "journal", item.title, msgText);
     });
 
-    await processUpdateAuto(user, "last_update_com", "comments", messages, (item) => {
-        return bot.sendMessage(user, `You received a comment from <b>${item.user_name}</b> on submission <a href="${item.url}">${escape(item.title)}</a>`);
+    await processUpdateAuto(user, "last_update_com", "comments", messages, async (item) => {
+        const msgText = `You received a comment from <b>${item.user_name}</b> on submission <a href="${item.url}">${escape(item.title)}</a>`;
+
+        await mainBot.sendMessage(user, msgText);
+        await filterBot.sendFilteredMessage(user, "comment", item.title, msgText);
     });
 
     db.updateUser(user);

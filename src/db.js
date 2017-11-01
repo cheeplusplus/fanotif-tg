@@ -60,7 +60,10 @@ exports.getUserById = async (id) => {
     return user;
 };
 
-
+/**
+ * Update a user
+ * @param {Object} user
+ */
 exports.updateUser = async (user) => {
     const db_users = await getUsersDb();
     db_users.update(user);
