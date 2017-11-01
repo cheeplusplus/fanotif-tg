@@ -77,18 +77,29 @@ class FilterBot extends NotifBot {
     }
 
     sendFilteredMessage(user, type, filterContent, message) {
-        const filters = user.filters || {};
-        const thisFilter = filters[type];
-        if (!thisFilter) {
-            return null;
+        let matchesFilter = false;
+        if (!Array.isArray(filterContent)) {
+            filterContent = [filterContent];
         }
 
-        const thisFilterRegex = new RegExp(thisFilter, "i");
+        if (type === "comment") {
+            matchesFilter = !!user.filterComments;
+        } else {
+            const filters = user.filters || {};
+            const thisFilter = filters[type];
+            if (!thisFilter) {
+                return null;
+            }
 
-        const matchesFilter = _.some(filterContent, (fc) => {
-            const match = thisFilterRegex.exec(fc);
-            return match !== null;
-        });
+            const thisFilterRegex = new RegExp(thisFilter, "i");
+
+            matchesFilter = _.some(filterContent, (fc) => {
+                const matchTest = thisFilterRegex.exec(fc);
+                const isMatch = matchTest !== null;
+                console.log(`Testing '${fc}' on '${thisFilter}': ${isMatch}`);
+                return isMatch;
+            });
+        }
 
         if (matchesFilter) {
             return this.sendMessage(user, message);
