@@ -32,9 +32,8 @@ const bot = new NotifBot(config.telegram.token);
 
 
 // FA check stuff
-async function processUpdateAuto(user, key, key2, fetch_all, process_message) {
+async function processUpdateAuto(user, key, key2, items, process_message) {
     const last_update = user[key] || 0;
-    let items = await fetch_all();
     if (!items || !items[key2]) return;
     items = items[key2];
     if (items.length < 1) return;
@@ -55,13 +54,21 @@ async function processUserUpdate(user) {
     console.log("Checking for user", user.id);
     const fa = new FurAffinityClient(user.cookie);
 
-    await processUpdateAuto(user, "last_update_sub", "submissions", () => fa.getSubmissions(), async (item) => {
+    const submissions = await fa.getSubmissions();
+
+    await processUpdateAuto(user, "last_update_sub", "submissions", submissions, async (item) => {
         const submission = await fa.getSubmission(item.id);
         await bot.sendMessage(user, `Submission: <b>${escape(submission.title)}</b> by ${submission.artist}\n\n[ <a href="${submission.url}">Direct</a> | <a href="${item.url}">Link</a> ]\n\n${bodyText(submission.body_text, 200)}`);
     });
 
-    await processUpdateAuto(user, "last_update_jou", "journals", () => fa.getMessages(), (item) => {
+    const messages = await fa.getMessages();
+
+    await processUpdateAuto(user, "last_update_jou", "journals", messages, (item) => {
         return bot.sendMessage(user, `Journal: <b>${escape(item.title)}</b> by ${item.user_name}\n\n[ <a href="${item.url}">Link</a> ]`);
+    });
+
+    await processUpdateAuto(user, "last_update_com", "comments", messages, (item) => {
+        return bot.sendMessage(user, `You received a comment from <b>${item.user_name}</b> on submission <a href="${item.url}">${escape(item.title)}</a>`);
     });
 
     db.updateUser(user);
