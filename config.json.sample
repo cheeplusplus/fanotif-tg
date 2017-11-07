@@ -1,0 +1,6 @@
+{
+    "telegram": {
+        "main_token": "TELEGRAM_BOT_A_TOKEN_HERE",
+        "filter_token": "TELEGRAM_BOT_B_TOKEN_HERE"
+    }
+}
