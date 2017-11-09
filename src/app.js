@@ -82,6 +82,13 @@ async function processUserUpdate(user) {
         await filterBot.sendFilteredMessage(user, "comment", item.title, msgText);
     });
 
+    await processUpdateAuto(user, "last_update_watch", "watches", messages, async (item) => {
+        const msgText = `You were watched by <a href="${item.user_url}">${item.user_name}</a>`;
+
+        await mainBot.sendMessage(user, msgText);
+        await filterBot.sendFilteredMessage(user, "comment", item.user_name, msgText); // TODO: Use a different filter
+    });
+
     db.updateUser(user);
 }
 
