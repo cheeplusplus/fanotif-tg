@@ -98,7 +98,8 @@ async function processUserUpdate(user) {
         await filterBot.sendFilteredMessage(user, "comment", item.title, msgText); // TODO: Use a different filter
     });
 
-    db.updateUser(user);
+    await db.updateUser(user);
+    await db.save();
 }
 
 async function processUpdates() {

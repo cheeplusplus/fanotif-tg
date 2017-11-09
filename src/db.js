@@ -68,3 +68,12 @@ exports.updateUser = async (user) => {
     const db_users = await getUsersDb();
     db_users.update(user);
 };
+
+/**
+ * Save the database
+ * @return {Promise}
+ */
+exports.save = () => {
+    db.saveDatabase();
+    return Promise.resolve();
+};
