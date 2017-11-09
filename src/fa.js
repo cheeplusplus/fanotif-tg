@@ -19,7 +19,6 @@ function fixDomainless(str) {
     return `https://www.furaffinity.net${str}`;
 }
 
-
 class FurAffinityClient {
     constructor(cookies) {
         this.cookies = cookies;
@@ -257,6 +256,64 @@ class FurAffinityClient {
             },
             "when": "#page-journal > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td.journal-title-box > span",
             "comments": this._getCommentsObj("#page-comments")
+        });
+    }
+
+    getNotes() {
+        return this._scrape("https://www.furaffinity.net/msg/pms/", {
+            "notes": {
+                "listItem": "#notes-list > tbody > tr.note",
+                "data": {
+                    "id": {
+                        "selector": "input[type='checkbox']",
+                        "attr": "value",
+                        "convert": parseInt
+                    },
+                    "title": "td.subject > a",
+                    "url": {
+                        "selector": "td.subject > a",
+                        "attr": "href",
+                        "convert": fixDomainless
+                    },
+                    "user_name": "td.col-from > a",
+                    "user_url": {
+                        "selector": "td.col-from > a",
+                        "attr": "href",
+                        "convert": fixDomainless
+                    },
+                    "unread": {
+                        "selector": "td.subject > a",
+                        "attr": "class",
+                        "convert": (s) => !!(s && s.contains("unread"))
+                    },
+                    "when": "td:nth-child(3) > span"
+                }
+            }
+        });
+    }
+
+    getNote(id) {
+        // TODO: Improve how the body and when are pulled
+        return this._scrape(`https://www.furaffinity.net/viewmessage/${id}/`, {
+            "title": "#pms-form > table.maintable > tbody > tr:nth-child(2) > td > font:nth-child(1) > b",
+            "user_name": "#pms-form > table.maintable > tbody > tr:nth-child(2) > td > font:nth-child(3) > a:nth-child(1)",
+            "user_url": {
+                "selector": "#pms-form > table.maintable > tbody > tr:nth-child(2) > td > font:nth-child(3) > a:nth-child(1)",
+                "attr": "href",
+                "convert": fixDomainless
+            },
+            "body_text": "#pms-form > table.maintable > tbody > tr:nth-child(2) > td",
+            "body_html": {
+                "selector": "#pms-form > table.maintable > tbody > tr:nth-child(2) > td",
+                "how": "html"
+            },
+            "when": {
+                "selector": "#pms-form > table.maintable > tbody > tr:nth-child(2) > td > font:nth-child(3)",
+                "convert": (s) => {
+                    const dateInd = s.indexOf(" On: ");
+                    return s.substring(dateInd + 5);
+                }
+            }
         });
     }
 

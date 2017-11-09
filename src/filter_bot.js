@@ -96,7 +96,7 @@ class FilterBot extends NotifBot {
             matchesFilter = _.some(filterContent, (fc) => {
                 const matchTest = thisFilterRegex.exec(fc);
                 const isMatch = matchTest !== null;
-                console.log(`Testing '${fc}' on '${thisFilter}': ${isMatch}`);
+                // console.log(`Testing '${fc}' on '${thisFilter}': ${isMatch}`);
                 return isMatch;
             });
         }

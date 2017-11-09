@@ -89,6 +89,15 @@ async function processUserUpdate(user) {
         await filterBot.sendFilteredMessage(user, "comment", item.user_name, msgText); // TODO: Use a different filter
     });
 
+    const notes = await fa.getNotes();
+
+    await processUpdateAuto(user, "last_update_note", "notes", notes, async (item) => {
+        const msgText = `You received a note from <b>${item.user_name}</b> titled <a href="${item.url}">${escape(item.title)}</a>`;
+
+        await mainBot.sendMessage(user, msgText);
+        await filterBot.sendFilteredMessage(user, "comment", item.title, msgText); // TODO: Use a different filter
+    });
+
     db.updateUser(user);
 }
 
