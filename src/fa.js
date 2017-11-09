@@ -284,7 +284,7 @@ class FurAffinityClient {
                     "unread": {
                         "selector": "td.subject > a",
                         "attr": "class",
-                        "convert": (s) => !!(s && s.contains("unread"))
+                        "convert": (s) => !!(s && s.indexOf("unread") > -1)
                     },
                     "when": "td:nth-child(3) > span"
                 }
