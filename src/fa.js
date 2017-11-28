@@ -136,6 +136,12 @@ class FurAffinityClient {
 
     getMessages() {
         return this._scrape("https://www.furaffinity.net/msg/others/", {
+            "self_user_name": "a#my-username",
+            "self_user_url": {
+                "selector": "a#my-username",
+                "attr": "href",
+                "convert": fixDomainless
+            },
             "watches": {
                 "listItem": "ul#watches > li:not(.section-controls)",
                 "data": {
@@ -171,6 +177,23 @@ class FurAffinityClient {
                         "selector": "a:nth-child(4)",
                         "attr": "href",
                         "convert": fixDomainless
+                    },
+                    "user_name": "a:nth-child(2)",
+                    "user_url": {
+                        "selector": "a:nth-child(2)",
+                        "attr": "href",
+                        "convert": fixDomainless
+                    },
+                    "when": "span"
+                }
+            },
+            "shouts": {
+                "listItem": "fieldset#messages-shouts > ul.message-stream > li:not(.section-controls)",
+                "data": {
+                    "id": {
+                        "selector": "input[type='checkbox']",
+                        "attr": "value",
+                        "convert": parseInt
                     },
                     "user_name": "a:nth-child(2)",
                     "user_url": {

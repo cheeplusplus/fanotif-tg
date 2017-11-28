@@ -60,7 +60,7 @@ async function processUserUpdate(user) {
 
     await processUpdateAuto(user, "last_update_sub", "submissions", submissions, async (item) => {
         const submission = await fa.getSubmission(item.id);
-        const msgText = `Submission: <b>${escape(submission.title)}</b> by ${submission.artist}\n\n[ <a href="${submission.url}">Direct</a> | <a href="${item.url}">Link</a> ]\n\n${bodyText(submission.body_text, 200)}`;
+        const msgText = `Submission: <b>${escape(submission.title)}</b> by ${escape(submission.artist)}\n\n[ <a href="${submission.url}">Direct</a> | <a href="${item.url}">Link</a> ]\n\n${bodyText(submission.body_text, 200)}`;
 
         await mainBot.sendMessage(user, msgText);
         await filterBot.sendFilteredMessage(user, "submission", submission.title, msgText);
@@ -69,21 +69,28 @@ async function processUserUpdate(user) {
     const messages = await fa.getMessages();
 
     await processUpdateAuto(user, "last_update_jou", "journals", messages, async (item) => {
-        const msgText = `Journal: <b>${escape(item.title)}</b> by ${item.user_name}\n\n[ <a href="${item.url}">Link</a> ]`;
+        const msgText = `Journal: <b>${escape(item.title)}</b> by ${escape(item.user_name)}\n\n[ <a href="${item.url}">Link</a> ]`;
 
         await mainBot.sendMessage(user, msgText);
         await filterBot.sendFilteredMessage(user, "journal", item.title, msgText);
     });
 
     await processUpdateAuto(user, "last_update_com", "comments", messages, async (item) => {
-        const msgText = `You received a comment from <b>${item.user_name}</b> on submission <a href="${item.url}">${escape(item.title)}</a>`;
+        const msgText = `You received a comment from <b>${escape(item.user_name)}</b> on submission <a href="${item.url}">${escape(item.title)}</a>`;
 
         await mainBot.sendMessage(user, msgText);
         await filterBot.sendFilteredMessage(user, "comment", item.title, msgText);
     });
 
     await processUpdateAuto(user, "last_update_watch", "watches", messages, async (item) => {
-        const msgText = `You were watched by <a href="${item.user_url}">${item.user_name}</a>`;
+        const msgText = `You were watched by <a href="${item.user_url}">${escape(item.user_name)}</a>`;
+
+        await mainBot.sendMessage(user, msgText);
+        await filterBot.sendFilteredMessage(user, "comment", item.user_name, msgText); // TODO: Use a different filter
+    });
+
+    await processUpdateAuto(user, "last_update_shout", "shouts", messages, async (item) => {
+        const msgText = `You got <a href="${messages.self_user_url}">a shout</a> from <a href="${item.user_url}">${escape(item.user_name)}</a>`;
 
         await mainBot.sendMessage(user, msgText);
         await filterBot.sendFilteredMessage(user, "comment", item.user_name, msgText); // TODO: Use a different filter
@@ -92,7 +99,7 @@ async function processUserUpdate(user) {
     const notes = await fa.getNotes();
 
     await processUpdateAuto(user, "last_update_note", "notes", notes, async (item) => {
-        const msgText = `You received a note from <b>${item.user_name}</b> titled <a href="${item.url}">${escape(item.title)}</a>`;
+        const msgText = `You received a note from <b>${escape(item.user_name)}</b> titled <a href="${item.url}">${escape(item.title)}</a>`;
 
         await mainBot.sendMessage(user, msgText);
         await filterBot.sendFilteredMessage(user, "comment", item.title, msgText); // TODO: Use a different filter
