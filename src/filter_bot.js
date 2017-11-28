@@ -78,9 +78,6 @@ class FilterBot extends NotifBot {
 
     sendFilteredMessage(user, type, filterContent, message) {
         let matchesFilter = false;
-        if (!Array.isArray(filterContent)) {
-            filterContent = [filterContent];
-        }
 
         if (type === "comment") {
             matchesFilter = !!user.filterComments;
@@ -91,19 +88,23 @@ class FilterBot extends NotifBot {
                 return null;
             }
 
-            const thisFilterRegex = new RegExp(thisFilter, "i");
-
-            matchesFilter = _.some(filterContent, (fc) => {
-                const matchTest = thisFilterRegex.exec(fc);
-                const isMatch = matchTest !== null;
-                // console.log(`Testing '${fc}' on '${thisFilter}': ${isMatch}`);
-                return isMatch;
-            });
+            matchesFilter = FilterBot.testFilter(thisFilter, filterContent);
         }
 
         if (matchesFilter) {
             return this.sendMessage(user, message);
         }
+    }
+
+    static testFilter(filterText, testContent) {
+        const thisFilterRegex = new RegExp(filterText, "i");
+
+        return _.some(_.castArray(testContent), (fc) => {
+            const matchTest = thisFilterRegex.exec(fc);
+            const isMatch = matchTest !== null;
+            // console.log(`Testing '${fc}' on '${thisFilter}': ${isMatch}`);
+            return isMatch;
+        });
     }
 }
 
