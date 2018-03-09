@@ -35,21 +35,21 @@ const filterBot = new FilterBot(config.telegram.filter_token);
 
 // FA check stuff
 async function processUpdateAuto(user, key, key2, items, process_message) {
-    const last_update = user[key] || 0;
+    let last_update = user[key] || [];
+    if (!Array.isArray(last_update)) {
+        last_update = [last_update];
+    }
+
     if (!items || !items[key2]) return;
     items = items[key2];
     if (items.length < 1) return;
 
-    const top = _.head(items);
-    if (top.id <= last_update) {
-        return;
-    }
-
+    const lastUpdateMapped = _.map(last_update, (id) => ({id}));
     // TODO: Remove 10 limit (only for testing)
-    const between = _.chain(items).filter((f) => f.id > last_update).take(10).value();
+    const between = _.chain(items).differenceBy(lastUpdateMapped, "id").take(10).value();
 
     await Promise.all(_.map(between, process_message));
-    user[key] = top.id;
+    user[key] = _.map(items, "id");
 }
 
 async function processUserUpdate(user) {
