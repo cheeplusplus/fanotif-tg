@@ -6,6 +6,10 @@ class FilterBot extends NotifBot {
     _configure() {
         super._configure();
 
+        this._onText(/\/reset/, (msg, match) => {
+            return 
+        });
+
         this._onText(/\/setsubmissionfilter(.+)*/, (msg, match) => {
             return this.setSubmissionFilter(msg, match[1]);
         });

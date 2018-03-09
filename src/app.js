@@ -2,7 +2,7 @@ const Promise = require("bluebird");
 const _ = require("lodash");
 const MainBot = require("./main_bot");
 const FilterBot = require("./filter_bot");
-const FurAffinityClient = require("./fa");
+const FurAffinityClient = require("fa.js").FurAffinityClient;
 const db = require("./db");
 const escape = require("escape-html");
 
