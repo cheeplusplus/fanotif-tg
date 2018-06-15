@@ -1,3 +1,8 @@
+if (process.argv.length > 2 && process.argv[2] === "--interactive") {
+    console.log("Entering interactive mode");
+    global.IS_MOCK = true;
+}
+
 const Promise = require("bluebird");
 const _ = require("lodash");
 const MainBot = require("./main_bot");
@@ -31,6 +36,18 @@ const config = require("../config.json");
 // Init bot
 const mainBot = new MainBot(config.telegram.main_token);
 const filterBot = new FilterBot(config.telegram.filter_token);
+
+
+// Wrap
+if (global.IS_MOCK) {
+    mainBot._mock_reply_handler((msg) => {
+        console.log(`MAINBOT> ${JSON.stringify(msg)}`);
+    });
+    filterBot._mock_reply_handler((msg) => {
+        console.log(`FILTERBOT> ${JSON.stringify(msg)}`);
+    });
+    mainBot._mock_simulate_message(config.telegram.mock_target_user, "/resetprogress");
+}
 
 
 // FA check stuff

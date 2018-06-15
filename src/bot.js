@@ -1,4 +1,4 @@
-const TelegramBot = require("node-telegram-bot-api");
+const TelegramBot = require("./telegram");
 const db = require("./db");
 
 
@@ -33,6 +33,14 @@ class NotifBot {
     async sendMessage(user, message) {
         const chatId = user.id;
         await this.bot.sendMessage(chatId, message, {"parse_mode": "HTML"});
+    }
+
+    _mock_simulate_message(chatId, text) {
+        return this.bot._mock_simulate_message(chatId, text);
+    }
+
+    _mock_reply_handler(callback) {
+        return this.bot._mock_reply_handler(callback);
     }
 }
 
