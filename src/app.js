@@ -7,6 +7,7 @@ const Promise = require("bluebird");
 const _ = require("lodash");
 const MainBot = require("./main_bot");
 const FilterBot = require("./filter_bot");
+const FirehoseBot = require("./firehose_bot");
 const FurAffinityClient = require("fa.js").FurAffinityClient;
 const db = require("./db");
 const escape = require("escape-html");
@@ -36,6 +37,7 @@ const config = require("../config.json");
 // Init bot
 const mainBot = new MainBot(config.telegram.main_token);
 const filterBot = new FilterBot(config.telegram.filter_token);
+const firehoseBot = new FirehoseBot(config.telegram.firehose_token);
 
 
 // Wrap
@@ -46,7 +48,18 @@ if (global.IS_MOCK) {
     filterBot._mock_reply_handler((msg) => {
         console.log(`FILTERBOT> ${JSON.stringify(msg)}`);
     });
-    mainBot._mock_simulate_message(config.telegram.mock_target_user, "/resetprogress");
+    firehoseBot._mock_reply_handler((msg) => {
+        console.log(`FIREHOSE> ${JSON.stringify(msg)}`);
+    });
+
+    const itera = async () => {
+        await mainBot._mock_simulate_message(config.telegram.mock_target_user, "/resetprogress");
+        await firehoseBot._mock_simulate_message(config.telegram.mock_target_user, "/list");
+    };
+
+    itera().catch((err) => {
+        console.log("ERR>", err);
+    });
 }
 
 
@@ -81,6 +94,7 @@ async function processUserUpdate(user) {
 
         await mainBot.sendMessage(user, msgText);
         await filterBot.sendFilteredMessage(user, "__multi__", {"submission": submission.title, "submitter": submission.artist}, msgText);
+        await firehoseBot.sendFirehoseMessage(user, submission.artist, msgText);
     });
 
     const messages = await fa.getMessages();
@@ -90,6 +104,7 @@ async function processUserUpdate(user) {
 
         await mainBot.sendMessage(user, msgText);
         await filterBot.sendFilteredMessage(user, "__multi__", {"journal": item.title, "submitter": item.user_name}, msgText);
+        await firehoseBot.sendFirehoseMessage(user, item.user_name, msgText);
     });
 
     await processUpdateAuto(user, "last_update_com", "comments", messages, async (item) => {
