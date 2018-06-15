@@ -7,7 +7,7 @@ class FilterBot extends NotifBot {
         super._configure();
 
         this._onText(/\/reset/, (msg, match) => {
-            return 
+            return this._resetFilters(msg);
         });
 
         this._onText(/\/setsubmissionfilter(.+)*/, (msg, match) => {
@@ -52,6 +52,12 @@ class FilterBot extends NotifBot {
         }
     }
 
+    async _resetFilters(msg) {
+        const user = await this.db.getUserById(msg.chat.id);
+        user.filters = {};
+        await this.db.updateUser(user);
+    }
+
     async setSubmissionFilter(msg, filter) {
         const user = await this.db.getUserById(msg.chat.id);
         return this._setFilter(user, "submission", filter);
@@ -87,12 +93,21 @@ class FilterBot extends NotifBot {
             matchesFilter = !!user.filterComments;
         } else {
             const filters = user.filters || {};
-            const thisFilter = filters[type];
-            if (!thisFilter) {
-                return null;
+
+            let matchMode;
+            if (type === "__multi__" && typeof filterContent === "object") {
+                matchMode = filterContent;
+            } else {
+                matchMode = {[type]: filterContent};
             }
 
-            matchesFilter = FilterBot.testFilter(thisFilter, filterContent);
+            matchesFilter = _.some(matchMode, (v, k) => {
+                const thisFilter = filters[k];
+                if (!thisFilter) {
+                    return false;
+                }
+                return FilterBot.testFilter(thisFilter, v);
+            });
         }
 
         if (matchesFilter) {

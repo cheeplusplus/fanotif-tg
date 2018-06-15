@@ -80,7 +80,7 @@ async function processUserUpdate(user) {
         const msgText = `Submission: <b>${escape(submission.title)}</b> by ${escape(submission.artist)}\n\n[ <a href="${submission.url}">Direct</a> | <a href="${item.url}">Link</a> ]\n\n${bodyText(submission.body_text, 200)}`;
 
         await mainBot.sendMessage(user, msgText);
-        await filterBot.sendFilteredMessage(user, "submission", submission.title, msgText);
+        await filterBot.sendFilteredMessage(user, "__multi__", {"submission": submission.title, "submitter": submission.artist}, msgText);
     });
 
     const messages = await fa.getMessages();
@@ -89,7 +89,7 @@ async function processUserUpdate(user) {
         const msgText = `Journal: <b>${escape(item.title)}</b> by ${escape(item.user_name)}\n\n[ <a href="${item.url}">Link</a> ]`;
 
         await mainBot.sendMessage(user, msgText);
-        await filterBot.sendFilteredMessage(user, "journal", item.title, msgText);
+        await filterBot.sendFilteredMessage(user, "__multi__", {"journal": item.title, "submitter": item.user_name}, msgText);
     });
 
     await processUpdateAuto(user, "last_update_com", "comments", messages, async (item) => {
