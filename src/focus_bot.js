@@ -68,8 +68,8 @@ class FocusBot extends NotifBot {
         if (list.length === 0) {
             await this.sendMessage(user, "You aren't following any users.");
         } else {
-            const listLi = list.map((m) => `<li>${m}</li>`);
-            await this.sendMessage(user, `You are following these users:<br><br><ul>${listLi}</ul>`);
+            const listLi = list.map((m) => `* ${m}\n`);
+            await this.sendMessage(user, `You are following these users:\n\n${listLi}`);
         }
     }
 
