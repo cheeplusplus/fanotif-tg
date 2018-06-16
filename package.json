@@ -7,7 +7,8 @@
     "license": "MIT",
     "private": true,
     "scripts": {
-        "start": "node src/app.js"
+        "start": "node src/app.js",
+        "interactive": "node src/app.js --interactive"
     },
     "devDependencies": {
         "eslint": "^4.19.1",
@@ -18,7 +19,7 @@
         "bluebird": "^3.5.0",
         "escape-html": "^1.0.3",
         "eslint-config-neo": "github:AndrewNeo/eslint-config-neo",
-        "fa.js": "^0.1.0",
+        "fa.js": "^0.1.1",
         "lodash": "^4.17.10",
         "lokijs": "^1.5.0",
         "node-telegram-bot-api": "^0.30.0"
