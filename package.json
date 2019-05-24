@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "FA notification bot for Telegram",
     "main": "src/app.js",
-    "author": "AndrewNeo <andrew@andrewneo.com>",
+    "author": "Kauko <kauko@biosynth.link>",
     "license": "MIT",
     "private": true,
     "scripts": {
@@ -11,17 +11,16 @@
         "interactive": "node src/app.js --interactive"
     },
     "devDependencies": {
-        "eslint": "^4.19.1",
-        "eslint-config-google": "^0.9.1",
-        "nodemon": "^1.17.5"
+        "@andrewneo/eslint-config": "^1.0.0",
+        "eslint": "^5.16.0",
+        "nodemon": "^1.19.0"
     },
     "dependencies": {
-        "bluebird": "^3.5.0",
+        "bluebird": "^3.5.4",
         "escape-html": "^1.0.3",
-        "eslint-config-neo": "github:AndrewNeo/eslint-config-neo",
-        "fa.js": "^0.1.1",
-        "lodash": "^4.17.10",
-        "lokijs": "^1.5.0",
+        "fa.js": "^0.1.2",
+        "lodash": "^4.17.11",
+        "lokijs": "^1.5.6",
         "node-telegram-bot-api": "^0.30.0"
     }
 }

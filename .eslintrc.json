@@ -6,7 +6,10 @@
         "es6": true,
         "node": true
     },
-    "extends": ["eslint:recommended", "neo"],
+    "extends": [
+        "eslint:recommended",
+        "@andrewneo"
+    ],
     "rules": {
         "require-jsdoc": "off"
     }
