@@ -8,9 +8,10 @@ Under the MIT license
 
 ### Installation
 
-Needs node 7.6.0 or greater
+Needs node 12.0 or greater
 
-Run `npm install --production`
+* `npm install`
+* `npm run build`
 
 ### Configuration
 
@@ -46,7 +47,5 @@ Filters use regexes. Example values:
 
 ## Future TODOs
 
-* Notification on new notes
 * Enable/disable the main bot
 * Allow not configuring the filter bot (or maybe enable filtering on the main bot too)
-* Split off the FA parser into a seperate library in npm
