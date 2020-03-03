@@ -1,8 +1,8 @@
-const _ = require("lodash");
-const NotifBot = require("./bot");
+import * as _ from "lodash";
+import { NotifBot, Message } from "./bot";
+import * as db from "../db";
 
-
-class FilterBot extends NotifBot {
+export class FilterBot extends NotifBot {
     _configure() {
         super._configure();
 
@@ -11,11 +11,11 @@ class FilterBot extends NotifBot {
         });
 
         this._onText(/\/setsubmissionfilter(.+)*/, (msg, match) => {
-            return this.setSubmissionFilter(msg, match[1]);
+            return this.setSubmissionFilter(msg, match?.[1]);
         });
 
         this._onText(/\/setjournalfilter(.+)*/, (msg, match) => {
-            return this.setJournalFilter(msg, match[1]);
+            return this.setJournalFilter(msg, match?.[1]);
         });
 
         this._onText(/\/togglecomments/, (msg, match) => {
@@ -27,23 +27,25 @@ class FilterBot extends NotifBot {
         });
     }
 
-    async _setFilter(user, type, filter) {
+    async _setFilter(user: db.UserRow, type: string, filter: string | undefined | null) {
         if (!filter || filter.trim() === "") {
             filter = null;
         } else {
             filter = filter.trim();
         }
 
-        try {
-            new RegExp(filter);
-        } catch (err) {
-            return this.sendMessage(user, `Got error parsing filter: <code>${escape(err.message)}</code>`);
+        if (filter) {
+            try {
+                const result = new RegExp(filter);
+            } catch (err) {
+                return this.sendMessage(user, `Got error parsing filter: <code>${escape(err.message)}</code>`);
+            }
         }
 
         const filters = user.filters || {};
         filters[type] = filter;
         user.filters = filters;
-        await this.db.updateUser(user);
+        await db.updateUser(user);
 
         if (filter) {
             return this.sendMessage(user, `Set <b>${type}</b> filter to <code>${filter}</code>`);
@@ -52,27 +54,27 @@ class FilterBot extends NotifBot {
         }
     }
 
-    async _resetFilters(msg) {
-        const user = await this.db.getUserById(msg.chat.id);
+    async _resetFilters(msg: Message) {
+        const user = await db.getUserById(msg.chat.id);
         user.filters = {};
-        await this.db.updateUser(user);
+        await db.updateUser(user);
     }
 
-    async setSubmissionFilter(msg, filter) {
-        const user = await this.db.getUserById(msg.chat.id);
+    async setSubmissionFilter(msg: Message, filter: string | undefined) {
+        const user = await db.getUserById(msg.chat.id);
         return this._setFilter(user, "submission", filter);
     }
 
-    async setJournalFilter(msg, filter) {
-        const user = await this.db.getUserById(msg.chat.id);
+    async setJournalFilter(msg: Message, filter: string | undefined) {
+        const user = await db.getUserById(msg.chat.id);
         return this._setFilter(user, "journal", filter);
     }
 
-    async toggleComments(msg) {
-        const user = await this.db.getUserById(msg.chat.id);
+    async toggleComments(msg: Message) {
+        const user = await db.getUserById(msg.chat.id);
         const currentState = !!user.filterComments;
         user.filterComments = !currentState;
-        await this.db.updateUser(user);
+        await db.updateUser(user);
 
         if (user.filterComments) {
             return this.sendMessage(user, "Now sending comments to this bot");
@@ -81,12 +83,12 @@ class FilterBot extends NotifBot {
         }
     }
 
-    async getFilters(msg) {
-        const user = await this.db.getUserById(msg.chat.id);
+    async getFilters(msg: Message) {
+        const user = await db.getUserById(msg.chat.id);
         return this.sendMessage(user, `Filters: <code>${JSON.stringify(user.filters)}</code>\nComments: <code>${user.filterComments}</code>`);
     }
 
-    sendFilteredMessage(user, type, filterContent, message) {
+    sendFilteredMessage(user: db.UserRow, type: "__multi__" | "comment", filterContent: string | { [filterType: string]: string }, message: string) {
         let matchesFilter = false;
 
         if (type === "comment") {
@@ -94,11 +96,13 @@ class FilterBot extends NotifBot {
         } else {
             const filters = user.filters || {};
 
-            let matchMode;
+            let matchMode: { [filterType: string]: string };
             if (type === "__multi__" && typeof filterContent === "object") {
                 matchMode = filterContent;
+            } else if (typeof filterContent === "string") {
+                matchMode = { [type]: filterContent };
             } else {
-                matchMode = {[type]: filterContent};
+                return this.sendMessage(user, "Error: Unable to process filter configuration");
             }
 
             matchesFilter = _.some(matchMode, (v, k) => {
@@ -115,7 +119,7 @@ class FilterBot extends NotifBot {
         }
     }
 
-    static testFilter(filterText, testContent) {
+    static testFilter(filterText: string, testContent: string) {
         const thisFilterRegex = new RegExp(filterText, "i");
 
         return _.some(_.castArray(testContent), (fc) => {
@@ -126,6 +130,3 @@ class FilterBot extends NotifBot {
         });
     }
 }
-
-
-module.exports = FilterBot;

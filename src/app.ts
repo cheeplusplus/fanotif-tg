@@ -1,22 +1,23 @@
-if (process.argv.length > 2 && process.argv[2] === "--interactive") {
+import "source-map-support/register";
+
+let IS_MOCK = false;
+
+if (process.env.IS_MOCK || process.argv.length > 2 && process.argv[2] === "--interactive") {
     console.log("Entering interactive mode");
-    global.IS_MOCK = true;
+    process.env.IS_MOCK = "true";
+    IS_MOCK = true;
 }
 
-const Promise = require("bluebird");
-const _ = require("lodash");
-const FirehoseBot = require("./firehose_bot");
-const FilterBot = require("./filter_bot");
-const FocusBot = require("./focus_bot");
-const FurAffinityClient = require("fa.js").FurAffinityClient;
-const db = require("./db");
-const escape = require("escape-html");
-
+import * as _ from "lodash";
+import { FirehoseBot, FilterBot, FocusBot } from "./bots";
+import { FurAffinityClient } from "fa.js";
+import * as db from "./db";
+import * as escape from "escape-html";
 
 // Variables
-const TIMEOUT = 60*1000;
+const TIMEOUT = 60 * 1000;
 
-function limit(str, size=500) {
+function limit(str: string, size: number = 500) {
     if (!str) return "";
     let s = str.substr(0, size);
     if (s.length === size) {
@@ -26,12 +27,20 @@ function limit(str, size=500) {
     return s;
 }
 
-function bodyText(str, size) {
+function bodyText(str: string, size: number) {
     return escape(limit(str, size));
 }
 
 // Load config
-const config = require("../config.json");
+// tslint:disable-next-line: no-var-requires
+const config = require("../config.json") as {
+    telegram: {
+        mock_target_user?: string;
+        firehose_token: string;
+        filter_token: string;
+        focus_token: string;
+    }
+};
 
 
 // Init bot
@@ -41,7 +50,7 @@ const focusBot = new FocusBot(config.telegram.focus_token);
 
 
 // Wrap
-if (global.IS_MOCK) {
+if (IS_MOCK) {
     firehoseBot._mock_reply_handler((msg) => {
         console.log(`FIREHOSE> ${JSON.stringify(msg)}`);
     });
@@ -53,8 +62,12 @@ if (global.IS_MOCK) {
     });
 
     const itera = async () => {
-        await firehoseBot._mock_simulate_message(config.telegram.mock_target_user, "/resetprogress");
-        await focusBot._mock_simulate_message(config.telegram.mock_target_user, "/list");
+        if (!config.telegram.mock_target_user) {
+            return;
+        }
+
+        firehoseBot._mock_simulate_message(config.telegram.mock_target_user, "/resetprogress");
+        focusBot._mock_simulate_message(config.telegram.mock_target_user, "/list");
     };
 
     itera().catch((err) => {
@@ -64,64 +77,64 @@ if (global.IS_MOCK) {
 
 
 // FA check stuff
-async function processUpdateAuto(user, key, key2, items, process_message) {
-    let last_update = user[key] || [];
+async function processUpdateAuto<T extends { id: number }>(user: db.UserRow, lastUpdateKey: db.UserLastUpdateRows, items: T[] | undefined, process_message: (item: T) => Promise<void>) {
+    let last_update = user[lastUpdateKey] || [];
     if (!Array.isArray(last_update)) {
         last_update = [last_update];
     }
 
-    if (!items || !items[key2]) return;
-    items = items[key2];
-    if (items.length < 1) return;
+    if (!items || items.length < 1) return;
 
-    const lastUpdateMapped = _.map(last_update, (id) => ({id}));
+    const lastUpdateMapped = _.map(last_update, (id) => ({ id }));
     // TODO: Remove 10 limit (only for testing)
     const between = _.chain(items).differenceBy(lastUpdateMapped, "id").take(10).value();
 
     await Promise.all(_.map(between, process_message));
-    user[key] = _.map(items, "id");
+    user[lastUpdateKey] = _.map(items, "id");
 }
 
-async function processUserUpdate(user) {
+async function processUserUpdate(user: db.UserRow) {
     console.log("Checking for user", user.id);
     const fa = new FurAffinityClient(user.cookie);
 
-    const submissions = await fa.getSubmissions();
+    const submissionsGenerator = fa.getSubmissions();
+    const submissionsFirstPage = await submissionsGenerator.next();
+    const submissions = submissionsFirstPage.value || undefined;
 
-    await processUpdateAuto(user, "last_update_sub", "submissions", submissions, async (item) => {
+    await processUpdateAuto(user, "last_update_sub", submissions, async (item) => {
         const submission = await fa.getSubmission(item.id);
         const msgText = `Submission: <b>${escape(submission.title)}</b> by ${escape(submission.artist)}\n\n[ <a href="${submission.url}">Direct</a> | <a href="${item.url}">Link</a> ]\n\n${bodyText(submission.body_text, 200)}`;
 
         await firehoseBot.sendMessage(user, msgText);
-        await filterBot.sendFilteredMessage(user, "__multi__", {"submission": submission.title, "submitter": submission.artist}, msgText);
+        await filterBot.sendFilteredMessage(user, "__multi__", { "submission": submission.title, "submitter": submission.artist }, msgText);
         await focusBot.sendFirehoseMessage(user, submission.artist, msgText);
     });
 
     const messages = await fa.getMessages();
 
-    await processUpdateAuto(user, "last_update_jou", "journals", messages, async (item) => {
+    await processUpdateAuto(user, "last_update_jou", messages?.journals, async (item) => {
         const msgText = `Journal: <b>${escape(item.title)}</b> by ${escape(item.user_name)}\n\n[ <a href="${item.url}">Link</a> ]`;
 
         await firehoseBot.sendMessage(user, msgText);
-        await filterBot.sendFilteredMessage(user, "__multi__", {"journal": item.title, "submitter": item.user_name}, msgText);
+        await filterBot.sendFilteredMessage(user, "__multi__", { "journal": item.title, "submitter": item.user_name }, msgText);
         await focusBot.sendFirehoseMessage(user, item.user_name, msgText);
     });
 
-    await processUpdateAuto(user, "last_update_com", "comments", messages, async (item) => {
+    await processUpdateAuto(user, "last_update_com", messages?.comments, async (item) => {
         const msgText = `You received a comment from <b>${escape(item.user_name)}</b> on submission <a href="${item.url}">${escape(item.title)}</a>`;
 
         await firehoseBot.sendMessage(user, msgText);
         await filterBot.sendFilteredMessage(user, "comment", item.title, msgText);
     });
 
-    await processUpdateAuto(user, "last_update_watch", "watches", messages, async (item) => {
+    await processUpdateAuto(user, "last_update_watch", messages?.watches, async (item) => {
         const msgText = `You were watched by <a href="${item.user_url}">${escape(item.user_name)}</a>`;
 
         await firehoseBot.sendMessage(user, msgText);
         await filterBot.sendFilteredMessage(user, "comment", item.user_name, msgText); // TODO: Use a different filter
     });
 
-    await processUpdateAuto(user, "last_update_shout", "shouts", messages, async (item) => {
+    await processUpdateAuto(user, "last_update_shout", messages?.shouts, async (item) => {
         const msgText = `You got <a href="${messages.self_user_url}">a shout</a> from <a href="${item.user_url}">${escape(item.user_name)}</a>`;
 
         await firehoseBot.sendMessage(user, msgText);
@@ -130,7 +143,7 @@ async function processUserUpdate(user) {
 
     const notes = await fa.getNotes();
 
-    await processUpdateAuto(user, "last_update_note", "notes", notes, async (item) => {
+    await processUpdateAuto(user, "last_update_note", notes?.notes, async (item) => {
         const msgText = `You received a note from <b>${escape(item.user_name)}</b> titled <a href="${item.url}">${escape(item.title)}</a>`;
 
         await firehoseBot.sendMessage(user, msgText);

@@ -1,11 +1,14 @@
-const EventEmitter = require("events");
+import { EventEmitter } from "events";
+import { BotCallback } from "../bots/bot";
 
-class MockBot {
-    constructor(token, options) {
+export class MockBot {
+    private handler: EventEmitter;
+
+    constructor() {
         this.handler = new EventEmitter();
     }
 
-    onText(regexp, callback) {
+    onText(regexp: RegExp, callback: BotCallback) {
         this.handler.on("text", (message) => {
             const result = regexp.exec(message.text);
             regexp.lastIndex = 0;
@@ -17,7 +20,7 @@ class MockBot {
         });
     }
 
-    sendMessage(chatId, text, options) {
+    sendMessage(chatId: string, text: string, options: any) {
         this.handler.emit("response", {
             "chat": {
                 "id": chatId
@@ -27,7 +30,7 @@ class MockBot {
         return Promise.resolve();
     }
 
-    _mock_simulate_message(chatId, text) {
+    _mock_simulate_message(chatId: string, text: string) {
         this.handler.emit("text", {
             "chat": {
                 "id": chatId
@@ -36,11 +39,9 @@ class MockBot {
         });
     }
 
-    _mock_reply_handler(callback) {
+    _mock_reply_handler(callback: (message: string) => void) {
         this.handler.on("response", (message) => {
             callback(message);
         });
     }
 }
-
-module.exports = MockBot;

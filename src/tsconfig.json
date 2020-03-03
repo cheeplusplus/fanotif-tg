@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "ES2019",
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "moduleResolution": "node",
+        "declaration": true,
+        "inlineSourceMap": true,
+        "outDir": "../build",
+        "baseUrl": "."
+    }
+}

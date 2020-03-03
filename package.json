@@ -2,17 +2,25 @@
     "name": "fanotif-tg",
     "version": "1.0.0",
     "description": "FA notification bot for Telegram",
-    "main": "src/app.js",
+    "main": "build/app.js",
     "author": "Kauko <kauko@biosynth.link>",
     "license": "MIT",
     "private": true,
     "scripts": {
-        "start": "node src/app.js",
-        "interactive": "node src/app.js --interactive"
+        "start": "node build/app.js",
+        "build": "tsc -b src",
+        "interactive": "node build/app.js --interactive"
     },
     "devDependencies": {
-        "eslint": "^6.8.0",
-        "nodemon": "^2.0.2"
+        "@types/bluebird": "^3.5.30",
+        "@types/escape-html": "0.0.20",
+        "@types/lodash": "^4.14.149",
+        "@types/lokijs": "^1.5.3",
+        "@types/node-telegram-bot-api": "^0.40.2",
+        "@types/source-map-support": "^0.5.1",
+        "nodemon": "^2.0.2",
+        "tslint": "^6.0.0",
+        "typescript": "^3.8.3"
     },
     "dependencies": {
         "bluebird": "^3.7.2",
@@ -20,6 +28,7 @@
         "fa.js": "^0.2.4",
         "lodash": "^4.17.15",
         "lokijs": "^1.5.8",
-        "node-telegram-bot-api": "^0.40.0"
+        "node-telegram-bot-api": "^0.40.0",
+        "source-map-support": "^0.5.16"
     }
 }
