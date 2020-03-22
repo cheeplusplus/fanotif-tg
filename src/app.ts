@@ -86,8 +86,12 @@ async function processUpdateAuto<T extends { id: number }>(user: db.UserRow, las
     if (!items || items.length < 1) return;
 
     const lastUpdateMapped = _.map(last_update, (id) => ({ id }));
-    // TODO: Remove 10 limit (only for testing)
-    const between = _.chain(items).differenceBy(lastUpdateMapped, "id").take(10).value();
+    const lastUpdateMax = _.max(last_update) || 0;
+
+    let iterChain = _.chain(items).differenceBy(lastUpdateMapped, "id");
+    iterChain = iterChain.filter(f => f.id > lastUpdateMax); // testing new thing
+    iterChain = iterChain.take(10); // TODO: Remove 10 limit (only for testing)
+    const between = iterChain.value();
 
     await Promise.all(_.map(between, process_message));
     user[lastUpdateKey] = _.map(items, "id");
