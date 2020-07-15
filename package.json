@@ -26,7 +26,7 @@
         "bluebird": "^3.7.2",
         "escape-html": "^1.0.3",
         "fa.js": "^0.2.4",
-        "lodash": "^4.17.15",
+        "lodash": "^4.17.19",
         "lokijs": "^1.5.8",
         "node-telegram-bot-api": "^0.40.0",
         "source-map-support": "^0.5.16"
