@@ -1,4 +1,5 @@
 import * as Loki from "lokijs";
+import { promisify } from "bluebird";
 
 export type UserLastUpdateRows = 'last_update_sub' | 'last_update_jou' | 'last_update_com' | 'last_update_watch' | 'last_update_shout' | 'last_update_note';
 
@@ -7,7 +8,7 @@ export interface UserRow {
     cookie?: string;
 
     // filter bot
-    filters?: {[type: string]: string | undefined | null};
+    filters?: { [type: string]: string | undefined | null };
     filterComments?: boolean;
 
     // firehose bot
@@ -47,7 +48,8 @@ const db_promise = new Promise<Loki>((s, r) => {
 });
 
 async function getUsersDb(): Promise<Loki.Collection<UserRow>> {
-    return (await db_promise).db_users;
+    const instance = await db_promise;
+    return instance.db_users;
 }
 
 
@@ -92,5 +94,6 @@ export async function updateUser(user: any): Promise<void> {
  * Save the database
  */
 export async function save(): Promise<void> {
-    db.saveDatabase();
+    const saveDb = promisify<void>(db.saveDatabase, {"context": db});
+    return saveDb();
 }

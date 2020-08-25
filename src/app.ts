@@ -12,7 +12,7 @@ import * as _ from "lodash";
 import { FirehoseBot, FilterBot, FocusBot } from "./bots";
 import { FurAffinityClient } from "fa.js";
 import * as db from "./db";
-import * as escape from "escape-html";
+import escape = require("escape-html");
 
 // Variables
 const TIMEOUT = 60 * 1000;
@@ -66,7 +66,7 @@ if (IS_MOCK) {
             return;
         }
 
-        firehoseBot._mock_simulate_message(config.telegram.mock_target_user, "/resetprogress");
+        focusBot._mock_simulate_message(config.telegram.mock_target_user, `/setusers andrewneo,kauko`);
         focusBot._mock_simulate_message(config.telegram.mock_target_user, "/list");
     };
 
