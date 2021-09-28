@@ -5,7 +5,6 @@
         "noImplicitAny": true,
         "strictNullChecks": true,
         "moduleResolution": "node",
-        "declaration": true,
         "inlineSourceMap": true,
         "outDir": "../build",
         "baseUrl": "."
