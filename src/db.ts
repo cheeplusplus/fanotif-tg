@@ -1,7 +1,7 @@
 import * as Loki from "lokijs";
 import { promisify } from "bluebird";
 
-export type UserLastUpdateRows = 'last_update_sub' | 'last_update_jou' | 'last_update_com' | 'last_update_watch' | 'last_update_shout' | 'last_update_note';
+export type UserLastUpdateRows = 'last_update_sub' | 'last_update_jou' | 'last_update_com' | 'last_update_jou_com' | 'last_update_watch' | 'last_update_shout' | 'last_update_note';
 
 export interface UserRow {
     id: number | string;
@@ -15,6 +15,7 @@ export interface UserRow {
     last_update_sub?: number[];
     last_update_jou?: number[];
     last_update_com?: number[];
+    last_update_jou_com?: number[];
     last_update_watch?: number[];
     last_update_shout?: number[];
     last_update_note?: number[];

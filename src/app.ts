@@ -131,6 +131,13 @@ async function processUserUpdate(user: db.UserRow) {
         await filterBot.sendFilteredMessage(user, "comment", item.title, msgText);
     });
 
+    await processUpdateAuto(user, "last_update_jou_com", messages?.journal_comments, async (item) => {
+        const msgText = `You received a comment from <b>${escape(item.user_name)}</b> on journal <a href="${item.url}">${escape(item.title)}</a>`;
+
+        await firehoseBot.sendMessage(user, msgText);
+        await filterBot.sendFilteredMessage(user, "comment", item.title, msgText);
+    });
+
     await processUpdateAuto(user, "last_update_watch", messages?.watches, async (item) => {
         const msgText = `You were watched by <a href="${item.user_url}">${escape(item.user_name)}</a>`;
 
