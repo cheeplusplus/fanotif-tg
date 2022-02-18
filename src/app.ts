@@ -19,7 +19,7 @@ const TIMEOUT = 60 * 1000;
 
 function limit(str: string, size: number = 500) {
     if (!str) return "";
-    let s = str.substr(0, size);
+    let s = str.substring(0, size);
     if (s.length === size) {
         s += "...";
     }
@@ -125,7 +125,7 @@ async function processUserUpdate(user: db.UserRow) {
 
     await processUpdateAuto(user, "last_update_jou", messages?.journals, async (item) => {
         const journal = await fa.getJournal(item.id);
-        const msgText = `Journal: <b>${escape(journal.title)}</b> by ${escape(journal.user_name)}\n\n[ <a href="${makeUrl(journal.self_link)}">Link</a> ]\n\n${bodyText(journal.body_text, 100)}`;
+        const msgText = `Journal: <b>${escape(journal.title)}</b> by ${escape(journal.user_name)}\n\n[ <a href="${makeUrl(journal.self_link)}">Link</a> ]\n\n${bodyText(journal.body_text, 200)}`;
 
         await firehoseBot.sendMessage(user, msgText);
         await filterBot.sendFilteredMessage(user, "__multi__", { "journal": item.journal_title, "submitter": item.user_name }, msgText);
@@ -172,6 +172,8 @@ async function processUserUpdate(user: db.UserRow) {
 
     await processUpdateAuto(user, "last_update_note", notes?.notes, async (item) => {
         const note = await fa.getNote(item.id);
+        await fa.moveNote(item.id, "unread"); // prev marks it read, so mark it unread
+
         const msgText = `You received a note from <b>${escape(item.user_name)}</b> titled <a href="${makeUrl(item.self_link)}">${escape(item.title)}</a>\n\n${bodyText(note.body_text, 200)}`;
 
         await firehoseBot.sendMessage(user, msgText);
