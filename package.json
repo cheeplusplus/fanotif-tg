@@ -13,8 +13,6 @@
     },
     "devDependencies": {
         "@types/async-lock": "^1.4.1",
-        "@types/bluebird": "^3.5.41",
-        "@types/escape-html": "^1.0.3",
         "@types/lodash": "^4.14.200",
         "@types/lokijs": "^1.5.11",
         "@types/node": "*",
@@ -24,8 +22,6 @@
     },
     "dependencies": {
         "async-lock": "^1.4.0",
-        "bluebird": "^3.7.2",
-        "escape-html": "^1.0.3",
         "fa.js": "^0.5.0",
         "lodash": "^4.17.21",
         "lokijs": "^1.5.12",

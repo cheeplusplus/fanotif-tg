@@ -1,5 +1,5 @@
 import * as Loki from "lokijs";
-import { promisify } from "bluebird";
+import { promisify } from "util";
 
 export type UserLastUpdateRows = 'last_update_sub' | 'last_update_jou' | 'last_update_com' | 'last_update_jou_com' | 'last_update_watch' | 'last_update_shout' | 'last_update_note';
 
@@ -95,6 +95,6 @@ export async function updateUser(user: any): Promise<void> {
  * Save the database
  */
 export async function save(): Promise<void> {
-    const saveDb = promisify<void>(db.saveDatabase, {"context": db});
+    const saveDb = promisify(db.saveDatabase).bind(db);
     return saveDb();
 }
