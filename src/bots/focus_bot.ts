@@ -65,7 +65,7 @@ export class FocusBot extends NotifBot {
         }
 
         if (_.includes(list, username)) {
-            user.firehose_list = _.without(username);
+            user.firehose_list = _.without(user.firehose_list, username);
             await db.updateUser(user);
             await this.sendMessage(user, `User <b>${username}</b> removed.`);
         } else {
@@ -73,7 +73,6 @@ export class FocusBot extends NotifBot {
         }
 
         await db.updateUser(user);
-        await this.sendMessage(user, `User <b>${username}</b> removed.`);
     }
 
     async setUsers(msg: Message, list: string | undefined) {
