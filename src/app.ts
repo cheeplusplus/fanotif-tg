@@ -11,6 +11,7 @@ if (process.env.IS_MOCK || process.argv.length > 2 && process.argv[2] === "--int
 import * as _ from "lodash";
 import { FirehoseBot, FilterBot, FocusBot } from "./bots";
 import { FurAffinityClient } from "fa.js";
+import { SITE_ROOT } from "fa.js/build/utils";
 import * as db from "./db";
 
 // Variables
@@ -79,7 +80,7 @@ function makeUrl(url: string) {
         return url;
     }
 
-    return FurAffinityClient.SITE_ROOT + url;
+    return SITE_ROOT + url;
 }
 
 // FA check stuff
@@ -107,9 +108,8 @@ async function processUserUpdate(user: db.UserRow) {
     console.log("Checking for user", user.id);
     const fa = new FurAffinityClient(user.cookie);
 
-    const submissionsGenerator = fa.getSubmissions();
-    const submissionsFirstPage = await submissionsGenerator.next();
-    const submissions = submissionsFirstPage.value || undefined;
+    const submissionsFirstPage = await fa.getSubmissionsPage();
+    const submissions = submissionsFirstPage.submissions;
 
     await processUpdateAuto(user, "last_update_sub", submissions, async (item) => {
         const submission = await fa.getSubmission(item.id);
