@@ -115,9 +115,9 @@ async function processUserUpdate(user: db.UserRow) {
         const submission = await fa.getSubmission(item.id);
         const msgText = `Submission: <b>${_.escape(submission.title)}</b> by ${_.escape(submission.artist_name)}\n\n[ <a href="${submission.content_url}">Direct</a> | <a href="${makeUrl(item.self_link)}">Link</a> ]\n\n${bodyText(submission.body_text, 200)}`;
 
-        await firehoseBot.sendMessage(user, msgText);
-        await filterBot.sendFilteredMessage(user, "__multi__", { "submission": submission.title, "submitter": submission.artist_name }, msgText);
-        await focusBot.sendFirehoseMessage(user, submission.artist_name, msgText);
+        await firehoseBot.sendFirehoseMessage(user, submission.artist_name, msgText);
+        await filterBot.sendFilteredMessage(user, "__multi__", submission.artist_name, { "submission": submission.title, "submitter": submission.artist_name }, msgText);
+        await focusBot.sendFocusMessage(user, submission.artist_name, msgText);
     });
 
     const messages = await fa.getMessages();
@@ -126,32 +126,32 @@ async function processUserUpdate(user: db.UserRow) {
         const journal = await fa.getJournal(item.id);
         const msgText = `Journal: <b>${_.escape(journal.title)}</b> by ${_.escape(journal.user_name)}\n\n[ <a href="${makeUrl(journal.self_link)}">Link</a> ]\n\n${bodyText(journal.body_text, 200)}`;
 
-        await firehoseBot.sendMessage(user, msgText);
-        await filterBot.sendFilteredMessage(user, "__multi__", { "journal": item.journal_title, "submitter": item.user_name }, msgText);
-        await focusBot.sendFirehoseMessage(user, item.user_name, msgText);
+        await firehoseBot.sendFirehoseMessage(user, item.user_name, msgText);
+        await filterBot.sendFilteredMessage(user, "__multi__", item.user_name, { "journal": item.journal_title, "submitter": item.user_name }, msgText);
+        await focusBot.sendFocusMessage(user, item.user_name, msgText);
     });
 
     await processUpdateAuto(user, "last_update_com", messages?.comments, async (item) => {
         const comment = await fa.getCommentText(item.id, "submission");
         const msgText = `You received a comment from <b>${_.escape(item.user_name)}</b> on submission <a href="${makeUrl(item.submission_url)}">${_.escape(item.submission_title)}</a>\n\n${bodyText(comment.body_text, 200)}`;
 
-        await firehoseBot.sendMessage(user, msgText);
-        await filterBot.sendFilteredMessage(user, "comment", item.submission_title, msgText);
+        await firehoseBot.sendFirehoseMessage(user, item.user_name, msgText);
+        await filterBot.sendFilteredMessage(user, "comment", item.user_name, item.submission_title, msgText);
     });
 
     await processUpdateAuto(user, "last_update_jou_com", messages?.journal_comments, async (item) => {
         const comment = await fa.getCommentText(item.id, "journal");
         const msgText = `You received a comment from <b>${_.escape(item.user_name)}</b> on journal <a href="${makeUrl(item.url)}">${_.escape(item.title)}</a>\n\n${bodyText(comment.body_text, 200)}`;
 
-        await firehoseBot.sendMessage(user, msgText);
-        await filterBot.sendFilteredMessage(user, "comment", item.title, msgText);
+        await firehoseBot.sendFirehoseMessage(user, item.user_name, msgText);
+        await filterBot.sendFilteredMessage(user, "comment", item.user_name, item.title, msgText);
     });
 
     await processUpdateAuto(user, "last_update_watch", messages?.watches, async (item) => {
         const msgText = `You were watched by <a href="${makeUrl(item.user_url)}">${_.escape(item.user_name)}</a>`;
 
-        await firehoseBot.sendMessage(user, msgText);
-        await filterBot.sendFilteredMessage(user, "comment", item.user_name, msgText); // TODO: Use a different filter
+        await firehoseBot.sendFirehoseMessage(user, item.user_name, msgText);
+        await filterBot.sendFilteredMessage(user, "comment", item.user_name, item.user_name, msgText); // TODO: Use a different filter
     });
 
     await processUpdateAuto(user, "last_update_shout", messages?.shouts, async (item) => {
@@ -163,8 +163,8 @@ async function processUserUpdate(user: db.UserRow) {
             msgText += `\n\n${bodyText(shout.body_text, 200)}`;
         }
 
-        await firehoseBot.sendMessage(user, msgText);
-        await filterBot.sendFilteredMessage(user, "comment", item.user_name, msgText); // TODO: Use a different filter
+        await firehoseBot.sendFirehoseMessage(user, item.user_name, msgText);
+        await filterBot.sendFilteredMessage(user, "comment", item.user_name, item.user_name, msgText); // TODO: Use a different filter
     });
 
     const notes = await fa.getNotes();
@@ -175,8 +175,8 @@ async function processUserUpdate(user: db.UserRow) {
 
         const msgText = `You received a note from <b>${_.escape(item.user_name)}</b> titled <a href="${makeUrl(item.self_link)}">${_.escape(item.title)}</a>\n\n${bodyText(note.body_text, 200)}`;
 
-        await firehoseBot.sendMessage(user, msgText);
-        await filterBot.sendFilteredMessage(user, "comment", item.title, msgText); // TODO: Use a different filter
+        await firehoseBot.sendFirehoseMessage(user, item.user_name, msgText);
+        await filterBot.sendFilteredMessage(user, "comment", item.user_name, item.title, msgText); // TODO: Use a different filter
     });
 
     await db.updateUser(user);

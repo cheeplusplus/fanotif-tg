@@ -111,11 +111,12 @@ export class FocusBot extends NotifBot {
         }
     }
 
-    sendFirehoseMessage(user: db.UserRow, username: string, message: string) {
+    async sendFocusMessage(user: db.UserRow, username: string, message: string) {
         const list = user.firehose_list || [];
 
         if (_.includes(list, username.trim().toLowerCase())) {
-            return this.sendMessage(user, message);
+            await this.sendMessage(user, message, this.shouldNotify(username));
+            this.didNotify(username);
         }
     }
 }

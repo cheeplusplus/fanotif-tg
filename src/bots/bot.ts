@@ -1,3 +1,5 @@
+import { LRUCache } from "lru-cache";
+
 import { getBotApi } from "../telegram";
 import * as db from "../db";
 import { MockBot } from "../telegram/mock";
@@ -8,6 +10,7 @@ export type User = import("node-telegram-bot-api").User;
 
 export class NotifBot {
     private bot: import("node-telegram-bot-api");
+    private lastNotifCache: LRUCache<string, number> = new LRUCache({ ttl: 60 * 60 * 1000, ttlAutopurge: false });
 
     constructor(token: string) {
         process.env.NTBA_FIX_319 = "ack";
@@ -36,7 +39,7 @@ export class NotifBot {
         await this.bot.sendMessage(chatId, `Hello, ${chatId}. ${JSON.stringify(user)}`);
     }
 
-    async sendMessage(user: number | string | {id: number | string}, message: string) {
+    protected async sendMessage(user: number | string | { id: number | string }, message: string, notify?: boolean) {
         let chatId: string | number;
         if (typeof user === "object") {
             chatId = user.id;
@@ -44,7 +47,7 @@ export class NotifBot {
             chatId = user;
         }
 
-        await this.bot.sendMessage(chatId, message, { "parse_mode": "HTML" });
+        await this.bot.sendMessage(chatId, message, { "parse_mode": "HTML", "disable_notification": notify });
     }
 
     _mock_simulate_message(chatId: string, text: string) {
@@ -53,5 +56,13 @@ export class NotifBot {
 
     _mock_reply_handler(callback: (message: string) => void) {
         return (this.bot as any as MockBot)._mock_reply_handler(callback);
+    }
+
+    protected shouldNotify(key: string) {
+        // Just depend on the TTL behavior instead of checking the value
+        return this.lastNotifCache.has(key);
+    }
+    protected didNotify(key: string) {
+        this.lastNotifCache.set(key, Date.now());
     }
 }

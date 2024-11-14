@@ -42,4 +42,9 @@ export class FirehoseBot extends NotifBot {
         await db.updateUser(user);
         await this.sendMessage(chatId, "Your progress has been reset.");
     }
+
+    async sendFirehoseMessage(user: db.UserRow, username: string, message: string) {
+        await this.sendMessage(user, message, this.shouldNotify(username));
+        this.didNotify(username);
+    }
 }

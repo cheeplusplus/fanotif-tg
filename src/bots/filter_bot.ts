@@ -88,7 +88,7 @@ export class FilterBot extends NotifBot {
         return this.sendMessage(user, `Filters: <code>${JSON.stringify(user.filters)}</code>\nComments: <code>${user.filterComments}</code>`);
     }
 
-    sendFilteredMessage(user: db.UserRow, type: "__multi__" | "comment", filterContent: string | { [filterType: string]: string }, message: string) {
+    async sendFilteredMessage(user: db.UserRow, type: "__multi__" | "comment", username: string, filterContent: string | { [filterType: string]: string }, message: string) {
         let matchesFilter = false;
 
         if (type === "comment") {
@@ -115,7 +115,8 @@ export class FilterBot extends NotifBot {
         }
 
         if (matchesFilter) {
-            return this.sendMessage(user, message);
+            await this.sendMessage(user, message, this.shouldNotify(username));
+            this.didNotify(username);
         }
     }
 
