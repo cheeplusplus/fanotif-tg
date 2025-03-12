@@ -22,7 +22,7 @@
     },
     "dependencies": {
         "async-lock": "^1.4.0",
-        "fa.js": "^0.7.4",
+        "fa.js": "^0.7.6",
         "lodash": "^4.17.21",
         "lokijs": "^1.5.12",
         "lru-cache": "^11.0.2",
