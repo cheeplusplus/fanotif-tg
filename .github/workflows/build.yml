@@ -1,0 +1,16 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24.x"
+      - name: Install packages
+        run: npm ci
+      - name: Build
+        run: npm run build
