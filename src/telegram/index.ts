@@ -1,5 +1,5 @@
 import { MockBot } from "./mock";
-import * as TelegramBot from "node-telegram-bot-api";
+import TelegramBot from "node-telegram-bot-api";
 
 export function getBotApi(token: string, options?: TelegramBot.ConstructorOptions): import('node-telegram-bot-api') {
     if (process.env.IS_MOCK === "true") {

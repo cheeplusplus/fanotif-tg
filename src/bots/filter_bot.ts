@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import _ from "lodash";
 import { NotifBot, Message } from "./bot";
 import * as db from "../db";
 
@@ -36,9 +36,10 @@ export class FilterBot extends NotifBot {
 
         if (filter) {
             try {
-                const result = new RegExp(filter);
+                new RegExp(filter);
             } catch (err) {
-                return this.sendMessage(user, `Got error parsing filter: <code>${escape(err.message)}</code>`);
+                let errMsg = err instanceof Error ? err.message : JSON.stringify(err);
+                return this.sendMessage(user, `Got error parsing filter: <code>${encodeURIComponent(errMsg)}</code>`);
             }
         }
 

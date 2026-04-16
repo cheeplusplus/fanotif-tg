@@ -1,5 +1,5 @@
-import * as AsyncLock from "async-lock";
-import * as _ from "lodash";
+import AsyncLock from "async-lock";
+import _ from "lodash";
 import { NotifBot, Message } from "./bot";
 import * as db from "../db";
 

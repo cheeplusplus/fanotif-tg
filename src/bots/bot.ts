@@ -4,7 +4,7 @@ import { getBotApi } from "../telegram";
 import * as db from "../db";
 import { MockBot } from "../telegram/mock";
 
-export type BotCallback = (msg: import("node-telegram-bot-api").Message, match: RegExpExecArray | null) => void;
+export type BotCallback = (msg: import("node-telegram-bot-api").Message, match: RegExpExecArray | null) => Promise<void> | void;
 export type Message = import("node-telegram-bot-api").Message;
 export type User = import("node-telegram-bot-api").User;
 

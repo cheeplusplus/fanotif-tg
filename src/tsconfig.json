@@ -1,13 +1,12 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "ES2019",
+        "module": "nodenext",
+        "target": "es2024",
         "noImplicitAny": true,
         "strictNullChecks": true,
-        "moduleResolution": "node",
+        "moduleResolution": "nodenext",
         "inlineSourceMap": true,
         "outDir": "../build",
-        "baseUrl": ".",
         "skipLibCheck": true
     }
 }
